@@ -8,17 +8,14 @@ import org.hibernate.cfg.Configuration;
 public class Main {
     public static void main(String[] args) {
         // Create a SessionFactory
-        SessionFactory factory = new Configuration()
+
+        try (SessionFactory factory = new Configuration()
                 .configure("hibernate.cfg.xml")
                 .addAnnotatedClass(Parent.class)
                 .addAnnotatedClass(Child.class)
-                .buildSessionFactory();
-
-        // Create a Session
-
-        try (factory) {
+                .buildSessionFactory()) {
+            // Create a Session and start a transaction
             Session session = factory.getCurrentSession();
-            // Start a transaction
             session.beginTransaction();
 
             // Create a Parent object
@@ -36,25 +33,31 @@ public class Main {
             parent.addChild(child1);
             parent.addChild(child2);
 
-            // Save the parent (this will also save the children due to cascade)
+            // Save the parent (cascading will save children as well)
             session.save(parent);
 
             // Commit the transaction
             session.getTransaction().commit();
 
-            // Retrieve the parent and print the children
-            session = factory.getCurrentSession();
-            session.beginTransaction();
+            // Open a new session for fetching the data
+            Session newSession = factory.openSession();
+            newSession.beginTransaction();
 
-            Parent savedParent = session.get(Parent.class, parent.getId());
-            System.out.println("Parent: " + savedParent.getName());
-            System.out.println("Children:");
-            for (Child child : savedParent.getChildren()) {
-                System.out.println(child.getName());
+            // Retrieve the parent and print the children
+            Parent savedParent = newSession.get(Parent.class, parent.getId());
+
+            if (savedParent != null) {
+                System.out.println("Parent: " + savedParent.getName());
+                System.out.println("Children:");
+                for (Child child : savedParent.getChildren()) {
+                    System.out.println(child.getName());
+                }
             }
 
-            session.getTransaction().commit();
+            newSession.getTransaction().commit();
+            newSession.close();
 
         }
+        // Ensure the factory is closed to release resources
     }
 }
