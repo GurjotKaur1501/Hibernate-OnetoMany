@@ -1,9 +1,11 @@
+package se.yrgo.domain;
 import javax.persistence.*;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Parent {
+public class Parent implements org.hibernate.annotations.Parent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -48,5 +50,10 @@ public class Parent {
     public void removeChild(Child child) {
         children.remove(child);
         child.setParent(null);
+    }
+
+    @Override
+    public Class<? extends Annotation> annotationType() {
+        return null;
     }
 }

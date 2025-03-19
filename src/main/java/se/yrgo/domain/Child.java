@@ -1,4 +1,7 @@
+package se.yrgo.domain;
 import javax.persistence.*;
+
+import org.hibernate.annotations.Parent;
 
 @Entity
 public class Child {

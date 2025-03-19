@@ -1,3 +1,6 @@
+package se.yrgo.main;
+
+import se.yrgo.domain.*;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -12,9 +15,9 @@ public class Main {
                 .buildSessionFactory();
 
         // Create a Session
-        Session session = factory.getCurrentSession();
 
-        try {
+        try (factory) {
+            Session session = factory.getCurrentSession();
             // Start a transaction
             session.beginTransaction();
 
@@ -52,8 +55,6 @@ public class Main {
 
             session.getTransaction().commit();
 
-        } finally {
-            factory.close();
         }
     }
 }
